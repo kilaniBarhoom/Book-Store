@@ -13,7 +13,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import EditIcon from "@mui/icons-material/Edit";
 import { Stack } from "@mui/material";
 import deleteBook from "../Contexts/DeleteBook";
-import { useNavigate } from "react-router-dom";
+import EditBook from "../Modals/EditBook";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -40,15 +40,19 @@ export default function BooksTable({ books }) {
     return { id: _id, title, author, publishYear };
   }
 
-  const nav = useNavigate();
   const [rows, setRows] = React.useState([]);
+  const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
     const rowsData = books.map(({ _id, title, author, publishYear }) => {
       return createData(_id, title, author, publishYear);
     });
     setRows(rowsData);
-  }, []);
+  }, [books]);
+
+  function handleClose() {
+    setOpen(false);
+  }
 
   return (
     <TableContainer component={Paper}>
@@ -79,19 +83,11 @@ export default function BooksTable({ books }) {
                   >
                     <DeleteIcon sx={{ color: "red " }} />
                   </IconButton>
-                  <IconButton
-                    aria-label="Info"
-                    onClick={() => nav(`/book/${row.id}`)}
-                  >
-                    <InfoIcon />
-                  </IconButton>
-                  <IconButton
-                    aria-label="Edit"
-                    onClick={() => nav(`/book/${row.id}`)}
-                  >
+                  <IconButton aria-label="Edit" onClick={() => setOpen(true)}>
                     <EditIcon />
                   </IconButton>
                 </Stack>
+                <EditBook book={row} open={open} handleClose={handleClose} />
               </StyledTableCell>
             </StyledTableRow>
           ))}

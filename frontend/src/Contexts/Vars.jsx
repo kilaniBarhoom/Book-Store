@@ -1,3 +1,3 @@
-const BaseURL = "http://localhost:3000";
+const BaseURL = "https://messageserver.onrender.com";
 
 export { BaseURL };

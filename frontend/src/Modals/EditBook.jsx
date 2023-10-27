@@ -8,7 +8,6 @@ import { BaseURL } from "../Contexts/Vars";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { useForm } from "react-hook-form";
 
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -28,20 +27,29 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
 
-export default function CreateBook({ open, handleClose }) {
+export default function EditBook({ book, open, handleClose }) {
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, reset } = useForm();
+  const [formData, setFormData] = React.useState({});
+  const [id, setId] = React.useState("");
+  React.useEffect(() => {
+    const { title, author, publishYear } = book;
+    setFormData({
+      title,
+      author,
+      publishYear,
+    });
+    setId(book.id);
+  }, []);
 
-  const handleCreateSubmit = (data) => {
+  const handleCreateSubmit = (e) => {
+    e.preventDefault();
     setLoading(true);
     axios
-      .post(`${BaseURL}/books`, data)
+      .put(`${BaseURL}/books/${id}`, formData)
       .then((res) => {
         setLoading(false);
-        toast.success("Book created successfully");
+        toast.success(res.data.message);
         handleClose();
-        reset();
-        // window.location.reload();
       })
       .catch((err) => {
         toast.error(err.response.data);
@@ -95,7 +103,7 @@ export default function CreateBook({ open, handleClose }) {
               </Button>
             </Box>
             <form
-              onSubmit={handleSubmit(handleCreateSubmit)}
+              onSubmit={handleCreateSubmit}
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -119,9 +127,11 @@ export default function CreateBook({ open, handleClose }) {
                       id="outlined-size-small"
                       size="small"
                       fullWidth
-                      {...register("title", {
-                        required: true,
-                      })}
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                      required
                     />
                   </Box>
 
@@ -131,7 +141,11 @@ export default function CreateBook({ open, handleClose }) {
                       id="outlined-size-small"
                       size="small"
                       fullWidth
-                      {...register("author", { required: true })}
+                      value={formData.author}
+                      onChange={(e) =>
+                        setFormData({ ...formData, author: e.target.value })
+                      }
+                      required
                     />
                   </Box>
                   <Box sx={{ width: "50%", textAlign: "left", marginTop: 3 }}>
@@ -141,11 +155,14 @@ export default function CreateBook({ open, handleClose }) {
                       id="outlined-size-small"
                       size="small"
                       fullWidth
-                      {...register("publishYear", {
-                        required: true,
-                        max: 2019,
-                        min: 1500,
-                      })}
+                      value={formData.publishYear}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          publishYear: e.target.value,
+                        })
+                      }
+                      required
                     />
                   </Box>
                 </Stack>
@@ -160,7 +177,7 @@ export default function CreateBook({ open, handleClose }) {
                       px: 4,
                     }}
                   >
-                    <span>Create</span>
+                    <span>Update</span>
                   </LoadingButton>
                 </Box>
               </Stack>
